@@ -32,11 +32,13 @@ class Tokenizer
     public function generate(string $uid, string $platform = "web"): TokenizerDto
     {
         $ser = SerializerBuilder::create()->build();
-        
-        /** generate  maximum */
-        $maximum = $this->dto(new MaximumDto(),$uid,$platform,$this->effectiveDay);
-        $maximum = $this->encryptor->encrypt($ser->serialize($maximum, 'json'));
     
+        $maximum = '';
+        if ($this->way){
+            /** generate  maximum */
+            $maximum = $this->dto(new MaximumDto(),$uid,$platform,$this->effectiveDay);
+            $maximum = $this->encryptor->encrypt($ser->serialize($maximum, 'json'));
+        }
         /** generate  token */
         $token = $this->dto(new TokenDto(),$uid,$platform,$this->ttl);
         $token = $this->encryptor->encrypt($ser->serialize($token, 'json'));
@@ -130,6 +132,70 @@ class Tokenizer
         $dto->generateDate  = date('Y-m-d H:i:s',time());
         $dto->effectiveDate = date('Y-m-d H:i:s', strtotime($ttl));
         return $dto;
+    }
+    
+    /**
+     * @return bool
+     */
+    public function isWay(): bool
+    {
+        return $this->way;
+    }
+    
+    /**
+     * @param bool $way
+     */
+    public function setWay(bool $way): void
+    {
+        $this->way = $way;
+    }
+    
+    /**
+     * @return string
+     */
+    public function getTtl(): string
+    {
+        return $this->ttl;
+    }
+    
+    /**
+     * @param string $ttl
+     */
+    public function setTtl(string $ttl): void
+    {
+        $this->ttl = $ttl;
+    }
+    
+    /**
+     * @return string
+     */
+    public function getEffectiveDay(): string
+    {
+        return $this->effectiveDay;
+    }
+    
+    /**
+     * @param string $effectiveDay
+     */
+    public function setEffectiveDay(string $effectiveDay): void
+    {
+        $this->effectiveDay = $effectiveDay;
+    }
+    
+    /**
+     * @return string
+     */
+    public function getSecret(): string
+    {
+        return $this->secret;
+    }
+    
+    /**
+     * @param string $secret
+     */
+    public function setSecret(string $secret): void
+    {
+        $this->secret = $secret;
     }
     
 }
