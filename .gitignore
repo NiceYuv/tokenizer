@@ -1,0 +1,17 @@
+###< Mac ###
+.DS_Store
+###> Mac ###
+
+###< IDE ###
+.idea
+###> IDE ###
+
+###< Composer ###
+/vendor/
+composer.lock
+###> Composer ###
+
+###< php ###
+index.php
+test.php
+###> php ###

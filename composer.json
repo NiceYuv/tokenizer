@@ -1,0 +1,22 @@
+{
+    "name": "niceyuv/tokenizer",
+    "description": "Token generation",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "niceyuv",
+            "email": "niceyu0108@gmail.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {
+        "php": "^7.0",
+        "jms/serializer-bundle": "^3.7"
+    },
+    "autoload":{
+        "psr-4":{
+            "NiceYuv\\":"./src/"
+        }
+    }
+}
