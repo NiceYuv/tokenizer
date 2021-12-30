@@ -12,8 +12,7 @@
     "minimum-stability": "dev",
     "require": {
         "php": ">=7.4",
-        "jms/serializer-bundle": ">=3.7",
-        "symfony/var-dumper": "6.1.x-dev"
+        "jms/serializer-bundle": ">=3.7"
     },
     "autoload":{
         "psr-4":{
