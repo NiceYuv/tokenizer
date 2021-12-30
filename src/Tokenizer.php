@@ -188,4 +188,12 @@ class Tokenizer
         $this->extendDate = $extendDate;
     }
 
+    /**
+     * @param string $secret
+     */
+    public function setSecret(string $secret): void
+    {
+        $this->secret = $secret;
+    }
+
 }

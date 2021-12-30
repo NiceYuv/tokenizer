@@ -114,6 +114,7 @@ $app->setWay(true);
 $app->setRefresh(true);
 $app->setExpireDate('+3 day');
 $app->setExtendDate('+15 day');
+$app->setSecret('8a8b57b12684504f511e85ad5073d1b2b430d143a');
 
 
 /** Tokenizer Example */
