@@ -3,12 +3,15 @@ declare(strict_types=1);
 
 namespace NiceYuv;
 
-/** Token the validity period */
-class TokenDto
+/** Extend the validity period */
+class ExtendDto
 {
     public string $id;
-    
+
+    public bool $refresh;
+
     public string $platform;
 
-    public int $expireTime;
+    public int $extendTime;
+
 }

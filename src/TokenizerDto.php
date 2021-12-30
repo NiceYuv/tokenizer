@@ -5,9 +5,9 @@ namespace NiceYuv;
 
 class TokenizerDto
 {
-    
+
     public string $token;
-    
-    public string $maximum;
-    
+
+    public string $extend;
+
 }
