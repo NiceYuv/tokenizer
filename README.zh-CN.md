@@ -1,4 +1,4 @@
-> [v1.1 简体中文](./doc-v1/README.zh-CN.md) | [v1.1 English](./doc-v1/README.md)
+> [v1.1 简体中文](/doc-v1/README.zh-CN.md) | [v1.1 English](/doc-v1/README.md)
 
 > [v1.2 简体中文](README.zh-CN.md) | [v1.2 English](README.md)
 
@@ -41,9 +41,9 @@ $resp = $app->generate('1');
 $data = $app->verify($resp->token);
 
 /** 验证临时令牌 返回值 */
-true
+TokenDto
 // OR
-false
+null
 ```
 
 ##### 刷新临时令牌 `refreshToken`

@@ -1,4 +1,4 @@
-> [v1.1 简体中文](./doc-v1/README.zh-CN.md) | [v1.1 English](./doc-v1/README.md)
+> [v1.1 简体中文](/doc-v1/README.zh-CN.md) | [v1.1 English](/doc-v1/README.md)
 
 > [v1.2 简体中文](README.zh-CN.md) | [v1.2 English](README.md)
 
@@ -42,9 +42,9 @@ $resp = $app->generate('1');
 $data = $app->verify($resp->token);
 
 /** Verify temporary token return value */
-true
+TokenDto
 // OR
-false
+null
 ```
 
 ##### Refresh the temporary token `refreshToken`

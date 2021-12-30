@@ -1,4 +1,4 @@
-> [v1.1 简体中文](./doc-v1/README.zh-CN.md) | [v1.1 English](./doc-v1/README.md)
+> [v1.1 简体中文](/doc-v1/README.zh-CN.md) | [v1.1 English](/doc-v1/README.md)
 
 > [v1.2 简体中文](README.zh-CN.md) | [v1.2 English](README.md)
 

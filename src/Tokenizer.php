@@ -86,9 +86,9 @@ class Tokenizer
     /**
      * verify Token
      * @param string $token
-     * @return bool
+     * @return null|TokenDto
      */
-    public function verify(string $token): bool
+    public function verify(string $token): ?TokenDto
     {
         $ser = SerializerBuilder::create()->build();
         $data = $this->build()->decrypt($token);
@@ -96,14 +96,14 @@ class Tokenizer
 
         /** If expireDate does not exist, then ExtendDto */
         if (!isset($obj->expireTime)){
-            return false;
+            return null;
         }
 
         /** Verification expiration time */
         if (intval($obj->expireTime) < time()) {
-            return false;
+            return null;
         }
-        return true;
+        return $obj;
     }
 
     /**
