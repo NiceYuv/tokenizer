@@ -7,6 +7,8 @@ namespace NiceYuv;
 class TokenDto
 {
     public string $id;
+
+    public ?bool $refresh = null;
     
     public string $platform;
 

@@ -1,6 +1,4 @@
-> [v1.1 简体中文](/doc-v1/README.zh-CN.md) | [v1.1 English](/doc-v1/README.md)
-
-> [v1.2 简体中文](README.zh-CN.md) | [v1.2 English](README.md)
+> [简体中文](README.zh-CN.md) | [English](README.md)
 
 > ### 背景
 > 经常会使用到的token令牌解决方案
@@ -28,10 +26,12 @@ $app = new \NiceYuv\Tokenizer();
 $resp = $app->generate('1');
 
 /** 生成令牌 返回值 */
-NiceYuv\TokenizerDto {#5 ▼
-  + token: "qiC77BlTQZGkk61Bk1NOcX+zYzzF/73J2i3Nh/O2Z2FtdA83tsCoAOzFnEGnBDaHh8OSwOxgVEw="
-  + extend: ""
+^ NiceYuv\TokenizerDto {#2
+  +token: "qiC77BlTQZGkk61Bk1NOcX+zYzzF/73J2i3Nh/O2Z2FtdA83tsCoABw75oI2d8iuu69AYel6ngc="
+  +extend: ""
 }
+// OR
+null
 ```
 
 ##### 验证临时令牌 `verify`
@@ -41,35 +41,42 @@ $resp = $app->generate('1');
 $data = $app->verify($resp->token);
 
 /** 验证临时令牌 返回值 */
-TokenDto
+^ NiceYuv\TokenDto {#88
+  +id: "1"
+  +refresh: null
+  +platform: "web"
+  +expireTime: 1641534214
+}
 // OR
 null
 ```
 
 ##### 刷新临时令牌 `refreshToken`
 - 需要将 `way` 设定为 `true`, 才可以返回 `ExtendToken`
-- 调用后会刷新 `token`
+- 调用后 `refreshToken` 会刷新 `token`
 - `注意` `注意` `注意` 
 - 传入的 `extend`不会刷新
 ```php
 $app = new \NiceYuv\Tokenizer();
 $app->setWay(true);
-$resp         = $app->generate('1');
-$refreshToken = $app->refreshToken($resp->extend);
+
+$resp = $app->generate('1');
+$data = $app->refreshToken($resp->extend);
 
 /** 
  * 刷新临时令牌 返回值
  */
-^ NiceYuv\TokenizerDto {#108 ▼
-  + token: "qiC77BlTQZGkk61Bk1NOcX+zYzzF/73J2i3Nh/O2Z2FtdA83tsCoAAPW9jG3T85lUquL4biDeL8="
-  + extend: "qiC77BlTQZGK6roRwTJcVpH2Hqlik+Xh5RTGs5P/djh/s2M8xf+9yYatvZoK+vESBrLXfb3u+6a+r0/hz3UowsUTNREYcR/4"
+^ NiceYuv\TokenizerDto {#96
+  +token: "qiC77BlTQZGkk61Bk1NOcX+zYzzF/73J2i3Nh/O2Z2FtdA83tsCoABw75oI2d8iuV3LYkfND3Cc="
+  +extend: "qiC77BlTQZGK6roRwTJcVlc0b58w7HlzumffGveAMg2v8jFxklOCaBJVuzVAdY+kJPaRZVM0k+fczNCI2mkQxLwEGdLJ2Ard"
 }
 // OR
 null
 ```
 
 ##### 刷新延长令牌 `refreshExtend`
-- 需要将 `way` `refresh` 都设定为 `true`
+- 需要将 `way` 设定为 `true`, 才可以返回 `ExtendToken`
+- 需要将 `refresh` 设定为 `true`, 才会允许刷新 `ExtendToken`
 ```php
 $app = new \NiceYuv\Tokenizer();
 $app->setWay(true);
@@ -89,16 +96,19 @@ null
 ##### 有几个参数需要注意
 ```php
 
-/** 是否生成长久令牌, 默认 (false)  */
+/** 
+ * 是否生成长久令牌, 默认 (false)  
+ * 当设置为 (true) 时, 则 `token` 允许被刷新
+ */
 private bool $way = false;
 
-/** 是否允许 `extend` 被刷新*/ 
+/** 是否允许 `extend` 被刷新, 默认 (false) */ 
 private bool $refresh = false;
 
-/** 临时令牌可用时间 */
+/** 临时令牌可用时间, 默认 (+1天)   */
 private string $expireDate = "+1 day";
 
-/** 延长令牌可用时间 */
+/** 延长令牌可用时间, 默认 (+7天) */
 private string $extendDate = '+7 day';
 
 /** 加密串 */
@@ -126,8 +136,8 @@ NiceYuv\Tokenizer {#2 ▼
 }
 ```
 
-#### 下面是几个用到的 `Dto` 需要注意
-##### TokenizerDto
+#### 下面是两个用到的 `Dto` 需要注意
+##### TokenizerDto 
 ```php
 class TokenizerDto
 {
@@ -144,24 +154,11 @@ class TokenizerDto
 class TokenDto
 {
     public string $id;
+
+    public ?bool $refresh = null;
     
     public string $platform;
 
     public int $expireTime;
-}
-```
-
-##### ExtendDto
-```php
-class ExtendDto
-{
-    public string $id;
-
-    public bool $refresh;
-
-    public string $platform;
-
-    public int $extendTime;
-
 }
 ```

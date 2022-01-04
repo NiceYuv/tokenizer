@@ -1,6 +1,4 @@
-> [v1.1 简体中文](/doc-v1/README.zh-CN.md) | [v1.1 English](/doc-v1/README.md)
-
-> [v1.2 简体中文](README.zh-CN.md) | [v1.2 English](README.md)
+> [简体中文](README.zh-CN.md) | [English](README.md)
 
 > #### background
 > Frequently used token solutions
@@ -16,10 +14,10 @@
 > So we specially designed this 'token' scheme
 
 
-##### That's what I think:<br/>
+##### That's what I think: <br/>
 1. When a user logs in and registers, a token is generated `Tokenizer`<br/>
 2. During temporary token time `Token`, The user can request the interface directly using the temporary token<br/>
-3.When the temporary token expires, it is automatically used `extend` Request refresh `Token` <br/>
+   3.When the temporary token expires, it is automatically used `extend` Request refresh `Token` <br/>
 
 ##### Generate token
 ```php
@@ -28,12 +26,13 @@ $app = new \NiceYuv\Tokenizer();
 $resp = $app->generate('1');
 
 /** Generate token return value */
-NiceYuv\TokenizerDto {#5 ▼
-  + token: "qiC77BlTQZGkk61Bk1NOcX+zYzzF/73J2i3Nh/O2Z2FtdA83tsCoAOzFnEGnBDaHh8OSwOxgVEw="
-  + extend: ""
+^ NiceYuv\TokenizerDto {#2
+  +token: "qiC77BlTQZGkk61Bk1NOcX+zYzzF/73J2i3Nh/O2Z2FtdA83tsCoABw75oI2d8iuu69AYel6ngc="
+  +extend: ""
 }
+// OR
+null
 ```
-
 
 ##### Validate temporary token
 ```php
@@ -42,42 +41,49 @@ $resp = $app->generate('1');
 $data = $app->verify($resp->token);
 
 /** Verify temporary token return value */
-TokenDto
-// OR
-null
-```
-
-##### Refresh the temporary token `refreshToken`
-- You need to set `way` to `true` to return `ExtendToken`
-- `token` will be refreshed after calling
-- `Attention` `Attention` `Attention`
-- The incoming `extend` will not be refreshed
-```php
-$app = new \NiceYuv\Tokenizer();
-$app->setWay(true);
-$resp         = $app->generate('1');
-$refreshToken = $app->refreshToken($resp->extend);
-
-/** 
- * Refresh temporary token Return value
- */
-^ NiceYuv\TokenizerDto {#108 ▼
-  + token: "qiC77BlTQZGkk61Bk1NOcX+zYzzF/73J2i3Nh/O2Z2FtdA83tsCoAAPW9jG3T85lUquL4biDeL8="
-  + extend: "qiC77BlTQZGK6roRwTJcVpH2Hqlik+Xh5RTGs5P/djh/s2M8xf+9yYatvZoK+vESBrLXfb3u+6a+r0/hz3UowsUTNREYcR/4"
+^ NiceYuv\TokenDto {#88
+  +id: "1"
+  +refresh: null
+  +platform: "web"
+  +expireTime: 1641534214
 }
 // OR
 null
 ```
 
+##### Refresh temporary token `refreshtoken`
+- You need to set `way` to `true` to return `extendtoken`
+- After calling, `refreshtoken` will refresh the `token`
+- `attention` `attention` `attention`
+- The incoming `extend` will not be refreshed
+```php
+$app = new \NiceYuv\Tokenizer();
+$app->setWay(true);
+
+$resp = $app->generate('1');
+$data = $app->refreshToken($resp->extend);
+
+/** 
+ * Refresh temporary token return value
+ */
+^ NiceYuv\TokenizerDto {#96
+  +token: "qiC77BlTQZGkk61Bk1NOcX+zYzzF/73J2i3Nh/O2Z2FtdA83tsCoABw75oI2d8iuV3LYkfND3Cc="
+  +extend: "qiC77BlTQZGK6roRwTJcVlc0b58w7HlzumffGveAMg2v8jFxklOCaBJVuzVAdY+kJPaRZVM0k+fczNCI2mkQxLwEGdLJ2Ard"
+}
+// OR
+null
+```
 
 ##### Refresh extension token `refreshExtend`
-- Need to `way` `refresh` Are set to `true`
+- Need to `way` Set to `true`, Before you can return `ExtendToken`
+- Need to `refresh` Set to `true`, Refresh will be allowed `ExtendToken`
 ```php
 $app = new \NiceYuv\Tokenizer();
 $app->setWay(true);
 $app->setRefresh(true);
 $resp    = $app->generate('1');
 $refresh = $app->refreshExtend($resp->extend);
+
 
 /** 
  * Refresh deferred token return value
@@ -87,22 +93,25 @@ OR
 null
 ```
 
-##### There are several parameters that need attention
+##### There are several parameters to note
 ```php
 
-/** Whether to generate long-term tokens, default (false)  */
+/** 
+  * Whether to generate a long-term token. The default is (false)
+  * When set to (true), `token` 'is allowed to be refreshed
+ */
 private bool $way = false;
 
-/** Whether to allow `extend` to be refreshed */ 
+/** Allow `extend` to be refreshed, default (false) */ 
 private bool $refresh = false;
 
-/** Temporary token available time */
+/** Available time of temporary token, default (+1 day)   */
 private string $expireDate = "+1 day";
 
-/** Extend token availability time */
+/** Extend token availability, default(+7 day) */
 private string $extendDate = '+7 day';
 
-/** Encrypted string */
+/** Encryption string */
 private string $secret = '8a8b57b12684504f511e85ad5073d1b2b430d143a';
 ```
 
@@ -127,7 +136,7 @@ NiceYuv\Tokenizer {#2 ▼
 }
 ```
 
-#### The following are a few used `Dto` need to pay attention
+#### The following are two `dto` that need attention
 ##### TokenizerDto
 ```php
 class TokenizerDto
@@ -145,24 +154,11 @@ class TokenizerDto
 class TokenDto
 {
     public string $id;
+
+    public ?bool $refresh = null;
     
     public string $platform;
 
     public int $expireTime;
-}
-```
-
-##### ExtendDto
-```php
-class ExtendDto
-{
-    public string $id;
-
-    public bool $refresh;
-
-    public string $platform;
-
-    public int $extendTime;
-
 }
 ```

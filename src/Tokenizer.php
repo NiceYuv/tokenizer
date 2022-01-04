@@ -7,15 +7,30 @@ use JMS\Serializer\SerializerBuilder;
 
 class Tokenizer
 {
-
+    /**
+     * Enable persistent tokens
+     * When enabled, allows the temporary token to be refreshed
+     */
     private bool $way = false;
 
+    /**
+     * Whether the persistent token is allowed to be refreshed
+     */
     private bool $refresh = false;
 
+    /**
+     * Temporary token validity
+     */
     private string $expireDate = "+1 day";
 
+    /**
+     * Long token validity
+     */
     private string $extendDate = '+7 day';
 
+    /**
+     * Encrypted information secret
+     */
     private string $secret = '8a8b57b12684504f511e85ad5073d1b2b430d143a';
 
     private DES $encryptor;
@@ -42,9 +57,9 @@ class Tokenizer
         /** generate token */
         $extendDto = '';
         if ($this->way){
-            $extendDto = $this->setupDtoDate(new ExtendDto(),$uid,$platform,$ser);
+            $extendDto = $this->setupDtoDate($uid,$platform,$ser, true);
         }
-        $tokenDto = $this->setupDtoDate(new TokenDto(),$uid,$platform,$ser);
+        $tokenDto = $this->setupDtoDate($uid,$platform,$ser);
 
         /** return */
         $tokenizer = new TokenizerDto();
@@ -55,29 +70,28 @@ class Tokenizer
 
     /**
      * setup dto info
-     * @param $classDto
      * @param string $uid
      * @param string $platform
      * @param Serializer $ser
+     * @param bool $long
      * @return string
      */
     private function setupDtoDate(
-        $classDto,
         string $uid,
         string $platform,
-        Serializer $ser
+        Serializer $ser,
+        bool $long = false
     ): string
     {
+        $classDto = new TokenDto();
         /** setup public info */
         $classDto->id = $uid;
         $classDto->platform = $platform;
 
-        if ($classDto instanceof ExtendDto){
+        if ($long){
             $classDto->refresh = $this->refresh;
-            $classDto->extendTime = strtotime($this->extendDate);
-        }
-
-        if ($classDto instanceof TokenDto){
+            $classDto->expireTime = strtotime($this->extendDate);
+        } else {
             $classDto->expireTime = strtotime($this->expireDate);
         }
         return $this->build()->encrypt($ser->serialize($classDto, 'json'));
@@ -90,14 +104,9 @@ class Tokenizer
      */
     public function verify(string $token): ?TokenDto
     {
-        $ser = SerializerBuilder::create()->build();
+        $ser  = SerializerBuilder::create()->build();
         $data = $this->build()->decrypt($token);
-        $obj = $ser->deserialize($data, TokenDto::class, 'json');
-
-        /** If expireDate does not exist, then ExtendDto */
-        if (!isset($obj->expireTime)){
-            return null;
-        }
+        $obj  = $ser->deserialize($data, TokenDto::class, 'json');
 
         /** Verification expiration time */
         if (intval($obj->expireTime) < time()) {
@@ -115,15 +124,20 @@ class Tokenizer
     {
         $ser = SerializerBuilder::create()->build();
         $data = $this->build()->decrypt($extend);
-        $obj = $ser->deserialize($data, ExtendDto::class, 'json');
+        $obj = $ser->deserialize($data, TokenDto::class, 'json');
 
-        /** If extendTime does not exist, then TokenDto */
-        if (!isset($obj->extendTime)){
+        /** Identify token information */
+        if (is_null($obj->refresh)){
+            return null;
+        }
+
+        /** Verification expiration time */
+        if (intval($obj->expireTime) < time()) {
             return null;
         }
 
         /** create  token */
-        $token = $this->setupDtoDate(new TokenDto(),$obj->id,$obj->platform,$ser);
+        $token = $this->setupDtoDate($obj->id,$obj->platform,$ser);
 
         /** return  */
         $tokenizer = new TokenizerDto();
@@ -141,19 +155,19 @@ class Tokenizer
     {
         $ser = SerializerBuilder::create()->build();
         $data = $this->encryptor->decrypt($extend);
-        $obj = $ser->deserialize($data, ExtendDto::class, 'json');
+        $obj = $ser->deserialize($data, TokenDto::class, 'json');
 
-        /** If extendTime does not exist, then TokenDto */
-        if (!isset($obj->extendTime)){
+        /** Identify token information */
+        if (is_null($obj->refresh) || $obj->refresh == false){
             return null;
         }
 
-        /** Not available for refresh operation */
-        if (!$obj->refresh){
+        /** Verification expiration time */
+        if (intval($obj->expireTime) < time()) {
             return null;
         }
 
-        return $this->setupDtoDate(new ExtendDto(),$obj->id,$obj->platform,$ser);
+        return $this->setupDtoDate($obj->id,$obj->platform,$ser,true);
     }
 
     /**
