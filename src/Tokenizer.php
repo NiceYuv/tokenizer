@@ -154,7 +154,7 @@ class Tokenizer
     public function refreshExtend(string $extend): ?string
     {
         $ser = SerializerBuilder::create()->build();
-        $data = $this->encryptor->decrypt($extend);
+        $data = $this->build()->decrypt($extend);
         $obj = $ser->deserialize($data, TokenDto::class, 'json');
 
         /** Identify token information */
