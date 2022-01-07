@@ -26,9 +26,15 @@ $app = new \NiceYuv\Tokenizer();
 $resp = $app->generate('1');
 
 /** 生成令牌 返回值 */
-^ NiceYuv\TokenizerDto {#2
-  +token: "qiC77BlTQZGkk61Bk1NOcX+zYzzF/73J2i3Nh/O2Z2FtdA83tsCoABw75oI2d8iuu69AYel6ngc="
-  +extend: ""
+^ NiceYuv\TokenizerDto {#15 ▼
+  +token: "qiC77BlTQZGkk61Bk1NOcX+zYzzF/73J2i3Nh/O2Z2FtdA83tsCoALd6+F7ftGofgrAXlIGKfFD3o2KlhxziD+yEfr8KS78V"
+  +extend: "qiC77BlTQZGK6roRwTJcVlc0b58w7HlzumffGveAMg2v8jFxklOCaBJVuzVAdY+kJPaRZVM0k+cyN9/uCKZhVIbPUgX36K8SwI6eVW8O7NZBlhnJrxqEWA=="
+  +login_date: DateTime @1641541496 {#58 ▼
+    date: 2022-01-07 15:44:56.908481 Asia/Shanghai (+08:00)
+  }
+  +expire_date: DateTime @1641800696 {#2 ▼
+    date: 2022-01-10 15:44:56.908440 Asia/Shanghai (+08:00)
+  }
 }
 // OR
 null
@@ -41,11 +47,13 @@ $resp = $app->generate('1');
 $data = $app->verify($resp->token);
 
 /** 验证临时令牌 返回值 */
-^ NiceYuv\TokenDto {#88
+^ NiceYuv\TokenDto {#90 ▼
   +id: "1"
   +refresh: null
   +platform: "web"
-  +expireTime: 1641534214
+  +expireTime: DateTime @1641547514 {#99 ▼
+    date: 2022-01-07 17:25:14.0 +08:00
+  }
 }
 // OR
 null
@@ -66,9 +74,15 @@ $data = $app->refreshToken($resp->extend);
 /** 
  * 刷新临时令牌 返回值
  */
-^ NiceYuv\TokenizerDto {#96
-  +token: "qiC77BlTQZGkk61Bk1NOcX+zYzzF/73J2i3Nh/O2Z2FtdA83tsCoABw75oI2d8iuV3LYkfND3Cc="
-  +extend: "qiC77BlTQZGK6roRwTJcVlc0b58w7HlzumffGveAMg2v8jFxklOCaBJVuzVAdY+kJPaRZVM0k+fczNCI2mkQxLwEGdLJ2Ard"
+^ NiceYuv\TokenizerDto {#34 ▼
+  +token: "qiC77BlTQZGkk61Bk1NOcX+zYzzF/73J2i3Nh/O2Z2FtdA83tsCoALd6+F7ftGofgrAXlIGKfFCL+az9o02XyeyEfr8KS78V"
+  +extend: "qiC77BlTQZGK6roRwTJcVlc0b58w7HlzumffGveAMg2v8jFxklOCaBJVuzVAdY+kJPaRZVM0k+cyN9/uCKZhVIbPUgX36K8SJALMiFMrUwtBlhnJrxqEWA=="
+  +login_date: DateTime @1641541631 {#146 ▼
+    date: 2022-01-07 15:47:11.492178 Asia/Shanghai (+08:00)
+  }
+  +expire_date: DateTime @1641800831 {#80 ▼
+    date: 2022-01-10 15:47:11.491920 Asia/Shanghai (+08:00)
+  }
 }
 // OR
 null
@@ -88,7 +102,16 @@ $refresh = $app->refreshExtend($resp->extend);
 /** 
  * 刷新延期令牌 返回值
  */
-string
+^ NiceYuv\TokenizerDto {#91 ▼
+  +token: "qiC77BlTQZGkk61Bk1NOcX+zYzzF/73J2i3Nh/O2Z2FtdA83tsCoALd6+F7ftGofgrAXlIGKfFD8y1M69PzOMuyEfr8KS78V"
+  +extend: "qiC77BlTQZGK6roRwTJcVlc0b58w7HlzumffGveAMg2v8jFxklOCaBJVuzVAdY+kJPaRZVM0k+cyN9/uCKZhVIbPUgX36K8ShGcwqFr2dtxBlhnJrxqEWA=="
+  +login_date: DateTime @1641541659 {#237 ▼
+    date: 2022-01-07 15:47:39.956036 Asia/Shanghai (+08:00)
+  }
+  +expire_date: DateTime @1641800859 {#185 ▼
+    date: 2022-01-10 15:47:39.955783 Asia/Shanghai (+08:00)
+  }
+}
 OR
 null
 ```
@@ -111,6 +134,9 @@ private string $expireDate = "+1 day";
 /** 延长令牌可用时间, 默认 (+7天) */
 private string $extendDate = '+7 day';
 
+/** 设置内部服务器时区 */
+private string $dateTimeZone = 'Asia/Shanghai';
+
 /** 加密串 */
 private string $secret = '8a8b57b12684504f511e85ad5073d1b2b430d143a';
 ```
@@ -124,14 +150,17 @@ $app->setRefresh(true);
 $app->setExpireDate('+3 day');
 $app->setExtendDate('+15 day');
 $app->setSecret('8a8b57b12684504f511e85ad5073d1b2b430d143a');
+$app->setDateTimeZone('Asia/Shanghai');
+
 
 
 /** Tokenizer 示例 */
-NiceYuv\Tokenizer {#2 ▼
+^ NiceYuv\Tokenizer {#3 ▼
   -way: true
   -refresh: true
   -expireDate: "+3 day"
-  -extendDate: "+15 day"
+  -extendDate: "+7 day"
+  -dateTimeZone: "Asia/Shanghai"
   -secret: "8a8b57b12684504f511e85ad5073d1b2b430d143a"
 }
 ```
@@ -146,6 +175,10 @@ class TokenizerDto
 
     public string $extend;
 
+    public DateTime $login_date;
+
+    public DateTime $expire_date;
+
 }
 ```
 
@@ -159,6 +192,6 @@ class TokenDto
     
     public string $platform;
 
-    public int $expireTime;
+    public DateTime $expireTime;
 }
 ```

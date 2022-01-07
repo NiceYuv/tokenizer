@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace NiceYuv;
 
+use DateTime;
+
 /** Token the validity period */
 class TokenDto
 {
@@ -12,5 +14,5 @@ class TokenDto
     
     public string $platform;
 
-    public int $expireTime;
+    public DateTime $expireTime;
 }

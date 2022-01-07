@@ -2,6 +2,8 @@
 declare(strict_types=1);
 namespace NiceYuv;
 
+use DateTime;
+use DateTimeZone;
 use JMS\Serializer\Serializer;
 use JMS\Serializer\SerializerBuilder;
 
@@ -29,11 +31,18 @@ class Tokenizer
     private string $extendDate = '+7 day';
 
     /**
+     * Set your time zone
+     */
+    private string $dateTimeZone = 'Asia/Shanghai';
+
+    /**
      * Encrypted information secret
      */
     private string $secret = '8a8b57b12684504f511e85ad5073d1b2b430d143a';
 
     private DES $encryptor;
+
+    private DateTime $dateTime;
 
     /**
      * @return DES
@@ -41,7 +50,21 @@ class Tokenizer
     private function build(): DES
     {
         $this->encryptor = new DES($this->secret, 'DES-ECB', DES::OUTPUT_BASE64);
+
+        /** setup dateTime */
+        $this->dateTime  = $this->setDateTime();
         return $this->encryptor;
+    }
+
+    /**
+     * setup dateTime zone
+     * @return DateTime
+     */
+    public function setDateTime(): DateTime
+    {
+        $dateTime = new DateTime();
+        $timeZone = new DateTimeZone($this->dateTimeZone);
+        return $dateTime->setTimezone($timeZone);
     }
 
     /**
@@ -65,6 +88,8 @@ class Tokenizer
         $tokenizer = new TokenizerDto();
         $tokenizer->token = $tokenDto;
         $tokenizer->extend = $extendDto;
+        $tokenizer->login_date  = $this->setDateTime();
+        $tokenizer->expire_date = $this->dateTime;
         return $tokenizer;
     }
 
@@ -83,6 +108,7 @@ class Tokenizer
         bool $long = false
     ): string
     {
+        $buildTokenizer = $this->build();
         $classDto = new TokenDto();
         /** setup public info */
         $classDto->id = $uid;
@@ -90,11 +116,11 @@ class Tokenizer
 
         if ($long){
             $classDto->refresh = $this->refresh;
-            $classDto->expireTime = strtotime($this->extendDate);
+            $classDto->expireTime = $this->dateTime->modify($this->extendDate);
         } else {
-            $classDto->expireTime = strtotime($this->expireDate);
+            $classDto->expireTime = $this->dateTime->modify($this->expireDate);
         }
-        return $this->build()->encrypt($ser->serialize($classDto, 'json'));
+        return $buildTokenizer->encrypt($ser->serialize($classDto, 'json'));
     }
 
     /**
@@ -108,8 +134,12 @@ class Tokenizer
         $data = $this->build()->decrypt($token);
         $obj  = $ser->deserialize($data, TokenDto::class, 'json');
 
-        /** Verification expiration time */
-        if (intval($obj->expireTime) < time()) {
+        /**
+         * Verification expiration time
+         * @var TokenDto $obj
+         * {id: int, refresh: ?bool, platform: string, expireTime: \DateTime }
+         */
+        if ($obj->expireTime->getTimestamp() < time()) {
             return null;
         }
         return $obj;
@@ -131,8 +161,12 @@ class Tokenizer
             return null;
         }
 
-        /** Verification expiration time */
-        if (intval($obj->expireTime) < time()) {
+        /**
+         * Verification expiration time
+         * @var TokenDto $obj
+         * {id: int, refresh: ?bool, platform: string, expireTime: \DateTime }
+         */
+        if ($obj->expireTime->getTimestamp() < time()) {
             return null;
         }
 
@@ -143,15 +177,17 @@ class Tokenizer
         $tokenizer = new TokenizerDto();
         $tokenizer->token = $token;
         $tokenizer->extend = $extend;
+        $tokenizer->login_date  = $this->setDateTime();
+        $tokenizer->expire_date = $this->dateTime;
         return  $tokenizer;
     }
 
     /**
      * refresh extend
      * @param string $extend
-     * @return string|null
+     * @return TokenizerDto|null
      */
-    public function refreshExtend(string $extend): ?string
+    public function refreshExtend(string $extend): ?TokenizerDto
     {
         $ser = SerializerBuilder::create()->build();
         $data = $this->build()->decrypt($extend);
@@ -162,12 +198,16 @@ class Tokenizer
             return null;
         }
 
-        /** Verification expiration time */
-        if (intval($obj->expireTime) < time()) {
+        /**
+         * Verification expiration time
+         * @var TokenDto $obj
+         * {id: int, refresh: ?bool, platform: string, expireTime: \DateTime }
+         */
+        if ($obj->expireTime->getTimestamp() < time()) {
             return null;
         }
 
-        return $this->setupDtoDate($obj->id,$obj->platform,$ser,true);
+        return $this->generate($obj->id,$obj->platform);
     }
 
     /**
@@ -210,4 +250,11 @@ class Tokenizer
         $this->secret = $secret;
     }
 
+    /**
+     * @param string $dateTimeZone
+     */
+    public function setDateTimeZone(string $dateTimeZone): void
+    {
+        $this->dateTimeZone = $dateTimeZone;
+    }
 }
