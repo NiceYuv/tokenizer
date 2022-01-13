@@ -4,6 +4,7 @@ namespace NiceYuv;
 
 use DateTime;
 use DateTimeZone;
+use Exception;
 use JMS\Serializer\Serializer;
 use JMS\Serializer\SerializerBuilder;
 
@@ -40,38 +41,34 @@ class Tokenizer
      */
     private string $secret = '8a8b57b12684504f511e85ad5073d1b2b430d143a';
 
-    private DES $encryptor;
-
-    private DateTime $dateTime;
-
     /**
      * @return DES
+     * @throws Exception
      */
     private function build(): DES
     {
-        $this->encryptor = new DES($this->secret, 'DES-ECB', DES::OUTPUT_BASE64);
-
-        /** setup dateTime */
-        $this->dateTime  = $this->setDateTime();
-        return $this->encryptor;
+        return new DES($this->secret, 'DES-ECB', DES::OUTPUT_BASE64);
     }
 
     /**
      * setup dateTime zone
+     * @param string $day
      * @return DateTime
+     * @throws Exception
      */
-    public function setDateTime(): DateTime
+    public function setDateTime(string $day = ''): DateTime
     {
-        $dateTime = new DateTime();
+        $dateTime = new DateTime($day);
         $timeZone = new DateTimeZone($this->dateTimeZone);
         return $dateTime->setTimezone($timeZone);
     }
 
     /**
      * generate token info
-     * @param string $uid  user id
-     * @param string $platform  platform[web|android|ios|h5|pc]
+     * @param string $uid user id
+     * @param string $platform platform[web|android|ios|h5|pc]
      * @return TokenizerDto
+     * @throws Exception
      */
     public function generate(string $uid, string $platform = "web"): TokenizerDto
     {
@@ -89,7 +86,7 @@ class Tokenizer
         $tokenizer->token = $tokenDto;
         $tokenizer->extend = $extendDto;
         $tokenizer->login_date  = $this->setDateTime();
-        $tokenizer->expire_date = $this->dateTime;
+        $tokenizer->expire_date = $this->setDateTime($this->expireDate);
         return $tokenizer;
     }
 
@@ -100,6 +97,7 @@ class Tokenizer
      * @param Serializer $ser
      * @param bool $long
      * @return string
+     * @throws Exception
      */
     private function setupDtoDate(
         string $uid,
@@ -110,15 +108,16 @@ class Tokenizer
     {
         $buildTokenizer = $this->build();
         $classDto = new TokenDto();
+
         /** setup public info */
         $classDto->id = $uid;
         $classDto->platform = $platform;
 
         if ($long){
             $classDto->refresh = $this->refresh;
-            $classDto->expireTime = $this->dateTime->modify($this->extendDate);
+            $classDto->expireTime = $this->setDateTime($this->extendDate);
         } else {
-            $classDto->expireTime = $this->dateTime->modify($this->expireDate);
+            $classDto->expireTime = $this->setDateTime($this->expireDate);
         }
         return $buildTokenizer->encrypt($ser->serialize($classDto, 'json'));
     }
@@ -127,6 +126,7 @@ class Tokenizer
      * verify Token
      * @param string $token
      * @return null|TokenDto
+     * @throws Exception
      */
     public function verify(string $token): ?TokenDto
     {
@@ -149,6 +149,7 @@ class Tokenizer
      * refresh token
      * @param string $extend
      * @return null|TokenizerDto
+     * @throws Exception
      */
     public function refreshToken(string $extend): ?TokenizerDto
     {
@@ -178,7 +179,7 @@ class Tokenizer
         $tokenizer->token = $token;
         $tokenizer->extend = $extend;
         $tokenizer->login_date  = $this->setDateTime();
-        $tokenizer->expire_date = $this->dateTime;
+        $tokenizer->expire_date = $this->setDateTime($this->expireDate);
         return  $tokenizer;
     }
 
@@ -186,6 +187,7 @@ class Tokenizer
      * refresh extend
      * @param string $extend
      * @return TokenizerDto|null
+     * @throws Exception
      */
     public function refreshExtend(string $extend): ?TokenizerDto
     {
